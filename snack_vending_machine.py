@@ -29,19 +29,19 @@ class values:
         #Variable costs
         self.purchase_price_margin = TriangularDistribution(0.60, 0.30, 0.45)
         self.selling_price = TriangularDistribution(0.80, 5.00, 2.50)
-        self.products_sold = TriangularDistribution(300, 900, 600)
+        self.products_sold = TriangularDistribution(300.0, 900.0, 600.0)
         #Fixed costs
-        self.rent = 500
-        self.maintanance = 150
+        self.rent = 500.0
+        self.maintanance = 150.0
         self.tax = 0.75
 
 value = values()
 
 for run in range(runs):
-    annual_profit = 0
+    annual_profit = 0.0
 
     for month in range(12):
-        revenue = (value.selling_price - value.purchase_price_margin) * value.products_sold
+        revenue = (value.selling_price * value.purchase_price_margin) * value.products_sold
         costs = value.rent + value.maintanance
 
         profit_before_tax = revenue - costs
