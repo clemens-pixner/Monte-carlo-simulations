@@ -27,7 +27,7 @@ class TriangularDistribution:
 class values:
     def __init__(self):
         #Variable costs
-        self.purchase_price_margin = TriangularDistribution(0.60, 0.30, 0.45)
+        self.purchase_cost_ratio = TriangularDistribution(0.60, 0.30, 0.45)
         self.selling_price = TriangularDistribution(0.80, 5.00, 2.50)
         self.products_sold = TriangularDistribution(300.0, 900.0, 600.0)
         #Fixed costs
@@ -37,12 +37,19 @@ class values:
 
 value = values()
 
+purchase_cost_ratio = value.purchase_cost_ratio.sample()
+selling_price = value.selling_price.sample()
+products_sold = value.products_sold.sample()
+rent = value.rent
+maintanance = value.maintanance
+tax = value.tax
+
 for run in range(runs):
     annual_profit = 0.0
 
     for month in range(12):
-        revenue = (value.selling_price * value.purchase_price_margin) * value.products_sold
-        costs = value.rent + value.maintanance
+        revenue = selling_price * products_sold
+        costs = rent + maintanance + ((selling_price * purchase_cost_ratio) * products_sold)
 
         profit_before_tax = revenue - costs
         profit_after_tax = profit_before_tax * 0.75
