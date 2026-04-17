@@ -11,7 +11,7 @@ class TriangularDistribution:
 class Inputs:
     def __init__(self):
         self.flighthours = TriangularDistribution(20.00, 80.00, 45.00)  
-        self.priceperminute = 32.00
+        self.priceperminute = 35.00
         
         def additional_revenue(self):
             r = random.random()
@@ -19,7 +19,7 @@ class Inputs:
             if r < 0.80: #80% no additional revenue
                 return 0.00
             else: #20% additional revenue 
-                return TriangularDistribution(2000.00, 12000.00, 5000.00).sample()
+                return TriangularDistribution(2_000.00, 12_000.00, 5_000.00).sample()
         
         def revenue(self):
             flighthours_value = self.flighthours.sample()
@@ -29,8 +29,8 @@ class Inputs:
         
 class VariableCosts:
     def __init__(self):
-        self.doc = TriangularDistribution()
-        self.overhaul_reserve = TriangularDistribution()
+        self.doc = TriangularDistribution(800.00, 1_150.00, 950.00)
+        self.overhaul_reserve = TriangularDistribution(300.00, 500.00, 400.00)
 
     def total_variable_costs(self, flighthours):
         doc_cost = self.doc.sample() * flighthours
@@ -39,14 +39,22 @@ class VariableCosts:
 
 class FixedCosts:
     def __init__(self):
-        self.aoc = TriangularDistribution()
-        self.insurance = TriangularDistribution()
-        self.salary = 5000.00
-        self.admin = TriangularDistribution()
+        self.aoc = TriangularDistribution(60_000.00, 100_000.00, 80_000.00)
+        self.insurance = TriangularDistribution(60_000.00, 120_000.00, 80_000.00)
+        self.salary = 5_000.00
+        self.admin = TriangularDistribution(25_000.00, 60_000.00, 40_000.00)
 
         def other(self):
             r = random.random()
-            return TriangularDistribution().sample()
+
+            if r < 80: #80% normal cost
+                other_costs = random.uniform(10_000.00, 20_000.00)
+            elif r < 95: #15% medium cost
+                other_costs = random.uniform(20_000.00, 30_000.00)
+            else: #5% high cost
+                other_costs = random.uniform(30_000.00, 40_000.00)
+
+            return other_costs
         
         def total_fixed_costs(self):
             return(
@@ -63,16 +71,34 @@ class Financing:
         self.equity = None
         self.loan = self.purchase_price - self.equity
         self.duration = None
+        self.current_rate = 0.055
         
-        def interest_rate(self):
-            pass
+    def interest_rate(self):
+        r = random.random()
+        
+        if r < 0.70: # 70% small movement (±0.3%)
+            change = random.triangular(-0.003, 0.003, 0.0)
+        
+        elif r < 0.90: # 20% medium movement (±1.0%)
+            change = random.triangular(-0.01, 0.01, 0.0)
 
-        def monthly_payment(self):
-            r = self.interest_rate() / 12
-            n = self.duration * 12
-            L = self.loan
+        else:  # 10% large movement (±2.0%)
+            change = random.triangular(-0.02, 0.02, 0.0)
 
-            return L * (r * (1 + r)**n) / ((1 + r)**n - 1)
+        self.current_rate += change
+
+        # realistic limits: 2% to 9%
+        self.current_rate = max(0.02, min(0.09, self.current_rate))
+
+        return self.current_rate
+
+    def monthly_payment(self):
+        annual_rate = self.interest_rate()
+        r = annual_rate / 12
+        n = self.duration * 12
+        L = self.loan
+
+        return L * (r * (1 + r) ** n) / ((1 + r) ** n - 1)
 
 class Depreciation:
     def __init__(self):
@@ -107,3 +133,26 @@ class Events:
             return 0.5
         else: #15% good weather/demand
             return 1.4
+        
+
+class OverhaulSystem:
+    def __init__(self):
+        self.total_overhaul = 0.00
+
+    def addition(self, overhaul):
+        self.total_overhaul += overhaul
+
+    def yearly_deduction(self):
+        r = random.random()
+
+        if r < 0.55: #55% calm year
+            factor = random.uniform(0.10, 0.50)
+        elif r < 0.90: #35% normal year
+            factor = random.uniform(0.60, 1.00)
+        else: #10% expensive year
+            factor = random.uniform(1.20, 2.20)
+        
+        deduction = self.total_overhaul * factor
+        self.total_overhaul -= deduction
+        return deduction
+
