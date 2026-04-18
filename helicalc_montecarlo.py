@@ -123,16 +123,51 @@ class Financing:
 
 class Depreciation:
     def __init__(self):
-        self.purchase_price = None
-        self.holding_period = None
-        self.initial_hours = None
+        self.purchase_price = 0.0
+        self.current_value = self.purchase_price
+        self.time = 0.0
+        self.age = 0
 
-    def total_hours(self, flighthours):
-        self.initial_hours += flighthours
+    def yearly_increase(self, flighthours):
+        self.time += flighthours
+        self.age += 1
+        return self.time, self.age
 
-    def monthly_depreciation(self):
-        return (self.purchase_price - self.residual_value) / (self.holding_period * 12)
+    def yearly_depreciation(self, flighthours):
+        # hours-based depreciation per flight hour
+        if self.time < 1000.0:
+            hour_rate = 350.0
+        elif self.time < 2000.0:
+            hour_rate = 280.0
+        elif self.time < 3000.0:
+            hour_rate = 220.0
+        elif self.time < 4000.0:
+            hour_rate = 260.0
+        else:
+            hour_rate = 320.0
 
+        time_depreciation = flighthours * hour_rate
+
+        # age-based depreciation rate
+        if self.age <= 2:
+            age_rate = random.uniform(0.04, 0.05)
+        elif self.age <= 5:
+            age_rate = random.uniform(0.03, 0.04)
+        elif self.age <= 10:
+            age_rate = random.uniform(0.02, 0.03)
+        else:
+            age_rate = 0.02
+
+        age_depreciation = self.current_value * age_rate
+
+        total_depreciation = time_depreciation + age_depreciation
+
+        self.current_value -= total_depreciation
+        self.current_value = max(0.0, self.current_value)
+
+        return total_depreciation
+        
+        
 class Events:
     def technical_failure(self):
         r = random.random()
