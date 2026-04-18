@@ -66,11 +66,11 @@ class FixedCosts:
 
 class Financing:
     def __init__(self):
-        self.purchase_price = None
+        self.purchase_price = None 
         self.equity = None
         self.loan = self.purchase_price - self.equity
-
         self.duration = None
+
         self.remaining_loan = self.loan
         self.remaining_months = self.duration * 12
 
@@ -80,13 +80,13 @@ class Financing:
         r = random.random()
 
         if r < 0.70:  # 70% small movement (±0.3%)
-            change = random.triangular(-0.003, 0.003, 0.0)
+            change = TriangularDistribution(-0.003, 0.003, 0.0)
         elif r < 0.90:  # 20% medium movement (±1.0%)
-            change = random.triangular(-0.01, 0.01, 0.0)
+            change = TriangularDistribution(-0.01, 0.01, 0.0)
         else:  # 10% large movement (±2.0%)
-            change = random.triangular(-0.02, 0.02, 0.0)
+            change = TriangularDistribution(-0.02, 0.02, 0.0)
 
-        self.current_rate += change
+        self.current_rate += change.sample()
 
         # realistic limits: 2% to 9%
         self.current_rate = max(0.02, min(0.09, self.current_rate))
@@ -123,9 +123,12 @@ class Financing:
 
 class Depreciation:
     def __init__(self):
-        self.holding_period = None
         self.purchase_price = None
-        self.residual_value = None
+        self.holding_period = None
+        self.initial_hours = None
+
+    def total_hours(self, flighthours):
+        self.initial_hours += flighthours
 
     def monthly_depreciation(self):
         return (self.purchase_price - self.residual_value) / (self.holding_period * 12)
