@@ -194,10 +194,25 @@ class OverhaulSystem: #OFF
         self.total_overhaul -= deduction
         return deduction
 
+
+#Analysis functions
+
+def prepare_dataframe(all_runs):
+    import pandas as pd
+    return pd.DataFrame(all_runs)
+
+def calculate_metrics(df):
+    results = {}
+
+    total_per_run = df.groupby("run")["cashflow"].sum()
+    
+
+
+
+#Simulation
 all_runs = []
 
 for run in range(1_000):
-    yearly_results = []
 
     inputs = Inputs()
     costs = VariableCosts()
@@ -238,7 +253,8 @@ for run in range(1_000):
         operating_profit = yearly_revenue - yearly_var_cost - yearly_fixed_cost - yearly_depreciation
         cashflow_after_debt = yearly_revenue - yearly_var_cost - yearly_fixed_cost - yearly_payments
 
-        yearly_results.append({
+        all_runs.append({
+            "run" : run + 1,
             "year" : year + 1,
             "flighthours" : yearly_flighthours,
             "revenue" : yearly_revenue,
@@ -251,5 +267,4 @@ for run in range(1_000):
             "loan" : financing.remaining_loan   
         })
 
-    all_runs.append(yearly_results)
 
